@@ -21,20 +21,20 @@ fn parse_input(input: &str) -> IResult<&str, Vec<Ranges>> {
     separated_list1(newline, parse_line)(input)
 }
 
-fn solution_a(input: &str) -> u32 {
+fn solution_a(input: &str) -> usize {
     let (_, parsed) = parse_input(input).unwrap();
     parsed
         .iter()
         .filter(|(a, b)| (a.1 >= b.1 && a.0 <= b.0) || (b.1 >= a.1 && b.0 <= a.0))
-        .count() as u32
+        .count()
 }
 
-fn solution_b(input: &str) -> u32 {
+fn solution_b(input: &str) -> usize {
     let (_, parsed) = parse_input(input).unwrap();
     parsed
         .iter()
         .filter(|(a, b)| b.1 >= a.0 && a.1 >= b.0)
-        .count() as u32
+        .count()
 }
 
 fn main() {
