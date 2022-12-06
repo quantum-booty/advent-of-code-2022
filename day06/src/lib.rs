@@ -18,10 +18,8 @@ mod tests {
     #[test]
     fn it_works() {
         assert_eq!(solution_a(TEST_INPUT, 4), 7);
-        let result = solution_a(INPUT, 4);
-        println!("{}", result);
+        println!("{}", solution_a(INPUT, 4));
         assert_eq!(solution_a(TEST_INPUT, 14), 19);
-        let result = solution_a(INPUT, 14);
-        println!("{}", result);
+        println!("{}", solution_a(INPUT, 14));
     }
 }
