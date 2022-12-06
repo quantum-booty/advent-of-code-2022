@@ -3,8 +3,8 @@ use std::collections::HashSet;
 pub fn solution_a(input: &[u8], window: usize) -> usize {
     input
         .windows(window)
-        .take_while(|window| HashSet::<_>::from_iter(window.iter()).len() != window.len())
-        .count()
+        .position(|window| HashSet::<_>::from_iter(window.iter()).len() == window.len())
+        .unwrap()
         + window
 }
 
