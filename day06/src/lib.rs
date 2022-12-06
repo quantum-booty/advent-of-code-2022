@@ -3,11 +3,7 @@ use std::collections::HashSet;
 pub fn solution_a(input: &[u8], window: usize) -> usize {
     input
         .windows(window)
-        .take_while(|window| {
-            let set = HashSet::<_>::from_iter(window.iter());
-            // println!("{:?} {:?}", set, window);
-            set.len() != window.len()
-        })
+        .take_while(|window| HashSet::<_>::from_iter(window.iter()).len() != window.len())
         .count()
         + window
 }
