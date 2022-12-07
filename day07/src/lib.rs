@@ -30,9 +30,11 @@ pub fn solution_b(input: &str) -> u32 {
     let unused = 70000000 - sizes["/"];
     let size_to_delete = 30000000 - unused;
 
-    let mut sizes: Vec<u32> = sizes.values().cloned().collect();
-    sizes.sort();
-    *sizes.iter().find(|size| **size >= size_to_delete).unwrap()
+    *sizes
+        .values()
+        .filter(|size| **size >= size_to_delete)
+        .min()
+        .unwrap()
 }
 
 fn calculate_dir_sizes(entries: Vec<Entry>) -> HashMap<String, u32> {
@@ -57,7 +59,7 @@ fn calculate_dir_sizes(entries: Vec<Entry>) -> HashMap<String, u32> {
             Entry::File(size) => {
                 for i in 0..current_dir.len() {
                     sizes
-                        .entry(current_dir[..i + 1].join(","))
+                        .entry(current_dir[..=i].join(","))
                         .and_modify(|s| *s += size)
                         .or_insert(size);
                 }
