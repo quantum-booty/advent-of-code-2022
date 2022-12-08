@@ -15,13 +15,11 @@ fn get_up_down_left_right(grid: &[Vec<u32>], x: usize, y: usize) -> Vec<Vec<u32>
     let column = grid.iter().map(|row| row[x]).collect::<Vec<u32>>();
     let (up, down) = column.split_at(y);
     let (left, right) = grid[y].split_at(x);
-    let right = right[1..].to_vec();
-    let down = down[1..].to_vec();
     vec![
         up.iter().rev().cloned().collect(),
-        down,
+        down[1..].to_vec(),
         left.iter().rev().cloned().collect(),
-        right,
+        right[1..].to_vec(),
     ]
 }
 
