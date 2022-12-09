@@ -41,7 +41,7 @@ pub fn solution_a(input: &str) -> usize {
         + (len - 1) * 4
 }
 
-pub fn solution_b(input: &str) -> u32 {
+pub fn solution_b(input: &str) -> usize {
     let grid = parse_grid(input);
     let len = grid.len();
     (1..len - 1)
@@ -57,10 +57,10 @@ pub fn solution_b(input: &str) -> u32 {
                         .map(|p| p + 1)
                         .unwrap_or_else(|| direction.len())
                 })
-                .product::<usize>()
+                .product()
         })
         .max()
-        .unwrap() as u32
+        .unwrap()
 }
 
 #[cfg(test)]
