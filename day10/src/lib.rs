@@ -22,61 +22,37 @@ fn parse(input: &str) -> IResult<&str, Vec<Instruction>> {
     separated_list1(newline, parse_line)(input)
 }
 
-pub fn solution_a(input: &str) -> i32 {
+pub fn solution(input: &str) -> i32 {
     let (_, instructions) = parse(input).unwrap();
     let mut x = 1;
     let mut cycle = 0;
     let mut signal = 0;
-    for inst in instructions {
-        match inst {
-            Instruction::Noop => {
-                cycle += 1;
-                if cycle % 40 == 20 {
-                    signal += cycle * x;
-                }
-            }
-            Instruction::Addx(v) => {
-                cycle += 1;
-                if cycle % 40 == 20 {
-                    signal += cycle * x;
-                }
-                cycle += 1;
-                if cycle % 40 == 20 {
-                    signal += cycle * x;
-                }
-                x += v;
-            }
-        }
-    }
-    signal
-}
-
-pub fn solution_b(input: &str) {
-    let (_, instructions) = parse(input).unwrap();
-    let mut x = 1;
-    let mut cycle = 0;
     let mut grid = vec![' '; 40 * 6];
     for inst in instructions {
-        match inst {
-            Instruction::Noop => {
-                grid[cycle] = draw_pixel(cycle, x);
-                cycle += 1;
+        grid[cycle] = draw_pixel(cycle, x);
+        cycle += 1;
+        if cycle % 40 == 20 {
+            signal += cycle as i32 * x;
+        }
+
+        if let Instruction::Addx(v) = inst {
+            grid[cycle] = draw_pixel(cycle, x);
+            cycle += 1;
+            if cycle % 40 == 20 {
+                signal += cycle as i32 * x;
             }
-            Instruction::Addx(v) => {
-                grid[cycle] = draw_pixel(cycle, x);
-                cycle += 1;
-                grid[cycle] = draw_pixel(cycle, x);
-                cycle += 1;
-                x += v;
-            }
+            x += v;
         }
     }
+
     let image = grid
         .chunks(40)
         .map(|row| String::from_iter(row.iter()))
         .collect::<Vec<String>>()
         .join("\n");
     println!("{}", image);
+
+    signal
 }
 
 fn draw_pixel(cycle: usize, x: i32) -> char {
@@ -93,10 +69,8 @@ mod tests {
 
     #[test]
     fn it_works() {
-        assert_eq!(solution_a(TEST_INPUT), 13140);
-        println!("{}", solution_a(INPUT));
-        solution_b(TEST_INPUT);
-        solution_b(INPUT);
+        assert_eq!(solution(TEST_INPUT), 13140);
+        println!("{}", solution(INPUT));
     }
 
     const INPUT: &str = include_str!("input.txt");
