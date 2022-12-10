@@ -57,6 +57,7 @@ pub fn solution(input: &str) -> i32 {
     signal
 }
 
+#[inline]
 fn draw_pixel(cycle: usize, x: i32) -> char {
     if (cycle as i32 % 40 - x).abs() < 2 {
         '#'
