@@ -14,10 +14,12 @@ enum Instruction {
     Noop,
 }
 
+use Instruction::*;
+
 fn parse(input: &str) -> IResult<&str, Vec<Instruction>> {
     let parse_line = alt((
-        map(preceded(tag("addx "), complete::i32), Instruction::Addx),
-        map(tag("noop"), |_| Instruction::Noop),
+        map(preceded(tag("addx "), complete::i32), Addx),
+        map(tag("noop"), |_| Noop),
     ));
     separated_list1(newline, parse_line)(input)
 }
@@ -35,7 +37,7 @@ pub fn solution(input: &str) -> i32 {
             signal += cycle as i32 * x;
         }
 
-        if let Instruction::Addx(v) = inst {
+        if let Addx(v) = inst {
             grid[cycle] = draw_pixel(cycle, x);
             cycle += 1;
             if cycle % 40 == 20 {
