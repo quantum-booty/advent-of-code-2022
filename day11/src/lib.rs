@@ -115,9 +115,9 @@ fn parse(input: &str) -> IResult<&str, Vec<Monkey>> {
     separated_list1(pair(newline, newline), parse_monkey)(input)
 }
 
-pub fn solution(input: &str, rounds: u32, part_a: bool) -> u64 {
+pub fn solution(input: &str, rounds: u32, part_a: bool) -> usize {
     let (_, mut monkeys) = parse(input).unwrap();
-    let mut inspections = HashMap::new();
+    let mut inspections = vec![0; monkeys.len()];
     let ceil: u64 = monkeys.iter().map(|m| m.test.divisible).product();
 
     for _ in 0..rounds {
@@ -139,10 +139,7 @@ pub fn solution(input: &str, rounds: u32, part_a: bool) -> u64 {
                 })
                 .collect();
 
-            inspections
-                .entry(i)
-                .and_modify(|n| *n += monkey.items.len() as u64)
-                .or_insert(monkey.items.len() as u64);
+            inspections[i] += monkey.items.len();
 
             monkey.items.clear();
 
@@ -152,7 +149,7 @@ pub fn solution(input: &str, rounds: u32, part_a: bool) -> u64 {
         }
     }
 
-    let mut heap = BinaryHeap::from_iter(inspections.values());
+    let mut heap = BinaryHeap::from_iter(inspections.iter());
     heap.pop().unwrap() * heap.pop().unwrap()
 }
 
