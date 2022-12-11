@@ -115,41 +115,6 @@ fn parse(input: &str) -> IResult<&str, Vec<Monkey>> {
     separated_list1(pair(newline, newline), parse_monkey)(input)
 }
 
-pub fn solution_a(input: &str) -> u64 {
-    let (_, mut monkeys) = parse(input).unwrap();
-    let mut inspections = HashMap::new();
-    for _ in 0..20 {
-        for i in 0..monkeys.len() {
-            let monkey = &mut monkeys[i];
-
-            let worry_to: Vec<(u64, usize)> = monkey
-                .items
-                .iter()
-                .map(|worry| {
-                    let inspected_worry = monkey.operation(*worry);
-                    let bored_worry = inspected_worry / 3;
-                    let throw_to = monkey.test(bored_worry);
-                    (bored_worry, throw_to)
-                })
-                .collect();
-
-            inspections
-                .entry(i)
-                .and_modify(|n| *n += monkey.items.len() as u64)
-                .or_insert(monkey.items.len() as u64);
-
-            monkey.items.clear();
-
-            for (worry, to) in worry_to {
-                monkeys[to].items.push(worry);
-            }
-        }
-    }
-
-    let mut heap = BinaryHeap::from_iter(inspections.values());
-    heap.pop().unwrap() * heap.pop().unwrap()
-}
-
 pub fn solution(input: &str, rounds: u32, part_a: bool) -> u64 {
     let (_, mut monkeys) = parse(input).unwrap();
     let mut inspections = HashMap::new();
