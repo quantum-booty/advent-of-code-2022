@@ -54,12 +54,9 @@ impl Monkey {
 }
 
 fn parse_items(input: &str) -> IResult<&str, Vec<u64>> {
-    map(
-        preceded(
-            pair(space1, tag("Starting items: ")),
-            separated_list1(tag(", "), complete::u64),
-        ),
-        |vec| vec,
+    preceded(
+        pair(space1, tag("Starting items: ")),
+        separated_list1(tag(", "), complete::u64),
     )(input)
 }
 
