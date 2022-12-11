@@ -1,5 +1,3 @@
-use std::collections::BinaryHeap;
-
 use nom::{
     branch::alt,
     bytes::complete::tag,
@@ -149,8 +147,8 @@ pub fn solution(input: &str, rounds: u32, part_a: bool) -> usize {
         }
     }
 
-    let mut heap = BinaryHeap::from_iter(inspections.iter());
-    heap.pop().unwrap() * heap.pop().unwrap()
+    inspections.sort();
+    inspections.iter().rev().take(2).product()
 }
 
 #[cfg(test)]
