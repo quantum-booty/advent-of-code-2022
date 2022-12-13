@@ -41,21 +41,7 @@ impl PartialOrd for Packet {
             (Val(l), Val(r)) => l.partial_cmp(r),
             (Val(l), List(_)) => List(vec![Val(*l)]).partial_cmp(other),
             (List(_), Val(r)) => self.partial_cmp(&List(vec![Val(*r)])),
-            (List(l), List(r)) => {
-                for pair in l.iter().zip_longest(r.iter()) {
-                    match pair {
-                        Both(left, right) => {
-                            let order = left.partial_cmp(right);
-                            if order != Some(Ordering::Equal) {
-                                return order;
-                            }
-                        }
-                        Left(_) => return Some(Ordering::Greater), // right ran out
-                        Right(_) => return Some(Ordering::Less),   // left ran out
-                    }
-                }
-                Some(Ordering::Equal)
-            }
+            (List(l), List(r)) => l.partial_cmp(r),
         }
     }
 }
