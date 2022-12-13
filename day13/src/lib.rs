@@ -12,7 +12,7 @@ use nom::{
 };
 use Packet::*;
 
-#[derive(Debug, Clone, Eq)]
+#[derive(Debug, PartialEq, Clone, Eq)]
 enum Packet {
     Val(u8),
     List(Vec<Packet>),
@@ -21,12 +21,6 @@ enum Packet {
 impl Ord for Packet {
     fn cmp(&self, other: &Self) -> Ordering {
         self.partial_cmp(other).unwrap()
-    }
-}
-
-impl PartialEq for Packet {
-    fn eq(&self, other: &Self) -> bool {
-        self.partial_cmp(other) == Some(Ordering::Equal)
     }
 }
 
