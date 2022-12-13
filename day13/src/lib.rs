@@ -26,12 +26,7 @@ impl Ord for Packet {
 
 impl PartialEq for Packet {
     fn eq(&self, other: &Self) -> bool {
-        match (self, other) {
-            (Val(l), Val(r)) => l == r,
-            (List(l), List(r)) => l == r,
-            (Val(l), List(_)) => List(vec![Val(*l)]) == *other,
-            (List(_), Val(r)) => *self == List(vec![Val(*r)]),
-        }
+        self.partial_cmp(other) == Some(Ordering::Equal)
     }
 }
 
