@@ -1,6 +1,3 @@
-use std::cmp::Ordering;
-
-use itertools::{EitherOrBoth::*, Itertools};
 use nom::{
     branch::alt,
     bytes::complete::tag,
@@ -10,6 +7,7 @@ use nom::{
     sequence::{delimited, pair, separated_pair},
     IResult,
 };
+use std::cmp::Ordering;
 use Packet::*;
 
 #[derive(Debug, PartialEq, Clone, Eq)]
