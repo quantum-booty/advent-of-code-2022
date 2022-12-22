@@ -61,8 +61,8 @@ pub fn solution(input: &str, simulation_steps: usize, total_steps: usize) -> u64
         for rock in &tetris {
             rocks.insert(*rock);
         }
+        y_max = y_max.max(*tetris.iter().map(|(_, y)| y).max().unwrap());
         tetris_stack.push(tetris);
-        y_max = *rocks.iter().map(|(_, y)| y).max().unwrap();
     }
 
     let repeat_segment_length = 30;
