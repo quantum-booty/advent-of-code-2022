@@ -3,44 +3,6 @@ use std::collections::HashSet;
 use itertools::Itertools;
 use Movement::*;
 
-fn visualise(rocks: &HashSet<(u64, u64)>, tetris: &[(u64, u64)]) {
-    // println!("{:?} {:?}", rocks, tetris);
-    let y_max = rocks
-        .iter()
-        .chain(tetris.iter())
-        .map(|(_, y)| y)
-        .max()
-        .unwrap();
-
-    let mut grid = vec![vec!['.'; 9]; *y_max as usize + 1];
-
-    for y in 0..y_max + 1 {
-        grid[y as usize][0] = '|';
-        grid[y as usize][8] = '|';
-    }
-
-    for x in 0..9 {
-        grid[0][x] = '-';
-    }
-
-    for rock in rocks.iter() {
-        // println!("{rock:?}");
-        grid[rock.1 as usize][rock.0 as usize] = '#';
-    }
-    for rock in tetris.iter() {
-        // println!("{rock:?}");
-        grid[rock.1 as usize][rock.0 as usize] = '@';
-    }
-
-    let plot = grid
-        .iter()
-        .rev()
-        .map(|line| line.iter().collect::<String>())
-        .collect::<Vec<String>>()
-        .join("\n");
-    println!("{plot}\n");
-}
-
 pub fn solution(input: &str, simulation_steps: usize, total_steps: usize) -> u64 {
     let movements = parse(input);
     let mut rocks = HashSet::<(u64, u64)>::new();
@@ -63,7 +25,6 @@ pub fn solution(input: &str, simulation_steps: usize, total_steps: usize) -> u64
         loop {
             let movement = movements.next().unwrap();
             // move left or right
-            // println!("Push to {movement:?}");
             match movement {
                 Left => {
                     let moved: Vec<_> = tetris.iter().map(|(x, y)| (*x - 1, *y)).collect();
@@ -91,10 +52,8 @@ pub fn solution(input: &str, simulation_steps: usize, total_steps: usize) -> u64
                 .iter()
                 .all(|rock| !rocks.contains(rock) && rock.1 != 0)
             {
-                // println!("Rock falls 1 unit");
                 tetris = moved;
             } else {
-                // println!("Rock cant fall");
                 break;
             }
             // visualise(&rocks, &tetris);
@@ -191,6 +150,41 @@ fn spawn_square(y_max: u64) -> Vec<(u64, u64)> {
         (3, y_max + 5),
         (4, y_max + 5),
     ]
+}
+
+fn visualise(rocks: &HashSet<(u64, u64)>, tetris: &[(u64, u64)]) {
+    let y_max = rocks
+        .iter()
+        .chain(tetris.iter())
+        .map(|(_, y)| y)
+        .max()
+        .unwrap();
+
+    let mut grid = vec![vec!['.'; 9]; *y_max as usize + 1];
+
+    for y in 0..y_max + 1 {
+        grid[y as usize][0] = '|';
+        grid[y as usize][8] = '|';
+    }
+
+    for x in 0..9 {
+        grid[0][x] = '-';
+    }
+
+    for rock in rocks.iter() {
+        grid[rock.1 as usize][rock.0 as usize] = '#';
+    }
+    for rock in tetris.iter() {
+        grid[rock.1 as usize][rock.0 as usize] = '@';
+    }
+
+    let plot = grid
+        .iter()
+        .rev()
+        .map(|line| line.iter().collect::<String>())
+        .collect::<Vec<String>>()
+        .join("\n");
+    println!("{plot}\n");
 }
 
 #[derive(Debug)]
