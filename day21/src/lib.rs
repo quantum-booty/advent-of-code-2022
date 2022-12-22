@@ -1,6 +1,4 @@
-#![feature(int_roundings)]
-use std::collections::HashMap;
-
+use hashbrown::HashMap;
 use nom::{
     branch::alt,
     bytes::complete::{tag, take},
