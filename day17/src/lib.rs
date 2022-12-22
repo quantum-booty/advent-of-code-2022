@@ -5,7 +5,7 @@ use Movement::*;
 
 pub fn solution(input: &str, simulation_steps: usize, total_steps: usize) -> u64 {
     let movements = parse(input);
-    let mut rocks = HashSet::<(u64, u64)>::new();
+    let mut rocks = HashSet::<(u64, u64)>::with_capacity(simulation_steps);
     let mut spawn_funcs = [
         spawn_horizontal,
         spawn_cross,
@@ -17,7 +17,7 @@ pub fn solution(input: &str, simulation_steps: usize, total_steps: usize) -> u64
     .cycle();
     let mut movements = movements.iter().cycle();
     let mut y_max = 0;
-    let mut tetris_stack = Vec::new();
+    let mut tetris_stack = Vec::with_capacity(simulation_steps);
     for _ in 0..simulation_steps {
         let spawn_func = spawn_funcs.next().unwrap();
         let mut tetris = spawn_func(y_max);
