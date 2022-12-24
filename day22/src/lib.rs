@@ -89,10 +89,6 @@ pub fn solution(input: &str, edges: HashMap<&str, (Coord, Coord)>, fold: FoldTyp
         y: 1,
     };
     let graph = parse_graph(&edge_map, &grid);
-    // for n in graph.keys().filter(|n| n.y == 8) {
-    //     println!("{n:?}");
-    // }
-    // panic!("");
     let (_, instructions) = parse_instructions(inst_str).unwrap();
     let mut cur_node = &graph[&start_coord];
     let mut cur_dir = Dir::R;
