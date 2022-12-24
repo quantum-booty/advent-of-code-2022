@@ -1,9 +1,14 @@
+#[macro_use]
+extern crate lazy_static;
+
 use std::collections::HashMap;
 
 use nom::{branch::alt, character::complete, combinator::map, multi::many1, IResult};
 
+type FoldType = Vec<((&'static str, Dir), (&'static str, Dir), bool)>;
+
 #[derive(Debug, Hash, PartialEq, Eq, Clone, Copy)]
-struct Coord {
+pub struct Coord {
     x: u32,
     y: u32,
 }
@@ -30,7 +35,7 @@ impl Node {
 }
 
 #[derive(Debug, Hash, PartialEq, Eq, Clone, Copy)]
-enum Dir {
+pub enum Dir {
     U,
     D,
     L,
@@ -75,9 +80,9 @@ enum Instruction {
     Distance(u32),
 }
 
-pub fn solution(input: &str, is_test: bool, is_part_a: bool) -> u32 {
+pub fn solution(input: &str, edges: HashMap<&str, (Coord, Coord)>, fold: FoldType) -> u32 {
     let (graph_str, inst_str) = input.split_once("\n\n").unwrap();
-    let edge_map = get_edge_map(is_test, is_part_a);
+    let edge_map = get_edge_map(edges, fold);
     let grid = parse_grid(graph_str);
     let start_coord = Coord {
         x: grid[0].iter().position(|c| c == &'.').unwrap() as u32 + 1,
@@ -156,89 +161,10 @@ fn get_edge_coords(is_edge_horizontal: bool, edge: (Coord, Coord)) -> Vec<Coord>
     edge_coords
 }
 
-fn get_edge_map(is_test: bool, is_part_a: bool) -> HashMap<(Coord, Dir), (Coord, Dir)> {
-    let edges = if is_test {
-        HashMap::from([
-            ("1a", (Coord { x: 5, y: 5 }, Coord { x: 8, y: 5 })),
-            ("1b", (Coord { x: 9, y: 1 }, Coord { x: 9, y: 4 })),
-            ("2a", (Coord { x: 5, y: 8 }, Coord { x: 8, y: 8 })),
-            ("2b", (Coord { x: 9, y: 9 }, Coord { x: 9, y: 12 })),
-            ("3a", (Coord { x: 1, y: 8 }, Coord { x: 4, y: 8 })),
-            ("3b", (Coord { x: 9, y: 12 }, Coord { x: 12, y: 12 })),
-            ("4a", (Coord { x: 1, y: 5 }, Coord { x: 4, y: 5 })),
-            ("4b", (Coord { x: 9, y: 1 }, Coord { x: 12, y: 1 })),
-            ("5a", (Coord { x: 1, y: 5 }, Coord { x: 1, y: 8 })),
-            ("5b", (Coord { x: 13, y: 12 }, Coord { x: 16, y: 12 })),
-            ("6a", (Coord { x: 12, y: 5 }, Coord { x: 12, y: 8 })),
-            ("6b", (Coord { x: 13, y: 9 }, Coord { x: 16, y: 9 })),
-            ("7a", (Coord { x: 13, y: 1 }, Coord { x: 13, y: 4 })),
-            ("7b", (Coord { x: 16, y: 9 }, Coord { x: 16, y: 12 })),
-        ])
-    } else {
-        HashMap::from([
-            ("1a", (Coord { x: 50, y: 151 }, Coord { x: 50, y: 200 })),
-            ("1b", (Coord { x: 51, y: 150 }, Coord { x: 100, y: 150 })),
-            ("2a", (Coord { x: 100, y: 51 }, Coord { x: 100, y: 100 })),
-            ("2b", (Coord { x: 101, y: 50 }, Coord { x: 150, y: 50 })),
-            ("3a", (Coord { x: 1, y: 101 }, Coord { x: 1, y: 150 })),
-            ("3b", (Coord { x: 51, y: 1 }, Coord { x: 51, y: 50 })),
-            ("4a", (Coord { x: 1, y: 101 }, Coord { x: 50, y: 101 })),
-            ("4b", (Coord { x: 51, y: 51 }, Coord { x: 51, y: 100 })),
-            ("5a", (Coord { x: 1, y: 151 }, Coord { x: 1, y: 200 })),
-            ("5b", (Coord { x: 51, y: 1 }, Coord { x: 100, y: 1 })),
-            ("6a", (Coord { x: 101, y: 1 }, Coord { x: 150, y: 1 })),
-            ("6b", (Coord { x: 1, y: 200 }, Coord { x: 50, y: 200 })),
-            ("7a", (Coord { x: 100, y: 101 }, Coord { x: 100, y: 150 })),
-            ("7b", (Coord { x: 150, y: 1 }, Coord { x: 150, y: 50 })),
-        ])
-    };
-    // from_edge, to_edge, is_same_direction
-    let fold = if is_test {
-        if is_part_a {
-            vec![
-                (("1a", Dir::U), ("2a", Dir::U), true),
-                (("4a", Dir::U), ("3a", Dir::U), true),
-                (("4b", Dir::U), ("3b", Dir::U), true),
-                (("6b", Dir::U), ("5b", Dir::U), true),
-                (("1b", Dir::L), ("7a", Dir::L), true),
-                (("5a", Dir::L), ("6a", Dir::L), true),
-                (("2b", Dir::L), ("7b", Dir::L), true),
-            ]
-        } else {
-            vec![
-                (("1a", Dir::U), ("1b", Dir::R), true),
-                (("2a", Dir::D), ("2b", Dir::R), false),
-                (("3a", Dir::D), ("3b", Dir::U), false),
-                (("4a", Dir::U), ("4b", Dir::D), false),
-                (("5a", Dir::L), ("5b", Dir::U), false),
-                (("6a", Dir::R), ("6b", Dir::D), false),
-                (("7a", Dir::D), ("7b", Dir::L), false),
-            ]
-        }
-    } else {
-        if is_part_a {
-            vec![
-                (("4a", Dir::U), ("6b", Dir::U), true),
-                (("5b", Dir::U), ("1b", Dir::U), true),
-                (("6a", Dir::U), ("2b", Dir::U), true),
-                (("3b", Dir::L), ("7b", Dir::L), true),
-                (("4b", Dir::L), ("2a", Dir::L), true),
-                (("3a", Dir::L), ("7a", Dir::L), true),
-                (("5a", Dir::L), ("1a", Dir::L), true),
-            ]
-        } else {
-            vec![
-                (("1a", Dir::R), ("1b", Dir::U), true),
-                (("2a", Dir::R), ("2b", Dir::U), true),
-                (("3a", Dir::L), ("3b", Dir::R), false),
-                (("4a", Dir::U), ("4b", Dir::R), true),
-                (("5a", Dir::L), ("5b", Dir::D), true),
-                (("6a", Dir::U), ("6b", Dir::U), true),
-                (("7a", Dir::R), ("7b", Dir::L), false),
-            ]
-        }
-    };
-
+fn get_edge_map(
+    edges: HashMap<&str, (Coord, Coord)>,
+    fold: FoldType,
+) -> HashMap<(Coord, Dir), (Coord, Dir)> {
     let mut map = HashMap::new();
     for ((from_edge, from_dir), (to_edge, to_dir), is_same_direction) in fold {
         let edge_pairs = get_edge_pairs(edges[&from_edge], edges[&to_edge], is_same_direction);
@@ -354,6 +280,20 @@ fn parse_instructions(input: &str) -> IResult<&str, Vec<Instruction>> {
 mod tests {
     use super::*;
 
+    #[test]
+    fn it_works() {
+        assert_eq!(
+            solution(TEST_INPUT, TEST_EDGES.to_owned(), TEST_FOLD_A.to_vec()),
+            6032
+        );
+        println!("{}", solution(INPUT, EDGES.to_owned(), FOLD_A.to_vec()));
+        assert_eq!(
+            solution(TEST_INPUT, TEST_EDGES.to_owned(), TEST_FOLD_B.to_vec()),
+            5031
+        );
+        println!("{}", solution(INPUT, EDGES.to_owned(), FOLD_B.to_vec()));
+    }
+
     const TEST_INPUT: &str = "        ...#
         .#..
         #...
@@ -371,11 +311,86 @@ mod tests {
 
     const INPUT: &str = include_str!("input.txt");
 
-    #[test]
-    fn it_works() {
-        assert_eq!(solution(TEST_INPUT, true, true), 6032);
-        println!("{}", solution(INPUT, false, true));
-        assert_eq!(solution(TEST_INPUT, true, false), 5031);
-        println!("{}", solution(INPUT, false, false));
+    lazy_static! {
+        static ref TEST_EDGES: HashMap<&'static str, (Coord, Coord)> = {
+            HashMap::from([
+                ("1a", (Coord { x: 5, y: 5 }, Coord { x: 8, y: 5 })),
+                ("1b", (Coord { x: 9, y: 1 }, Coord { x: 9, y: 4 })),
+                ("2a", (Coord { x: 5, y: 8 }, Coord { x: 8, y: 8 })),
+                ("2b", (Coord { x: 9, y: 9 }, Coord { x: 9, y: 12 })),
+                ("3a", (Coord { x: 1, y: 8 }, Coord { x: 4, y: 8 })),
+                ("3b", (Coord { x: 9, y: 12 }, Coord { x: 12, y: 12 })),
+                ("4a", (Coord { x: 1, y: 5 }, Coord { x: 4, y: 5 })),
+                ("4b", (Coord { x: 9, y: 1 }, Coord { x: 12, y: 1 })),
+                ("5a", (Coord { x: 1, y: 5 }, Coord { x: 1, y: 8 })),
+                ("5b", (Coord { x: 13, y: 12 }, Coord { x: 16, y: 12 })),
+                ("6a", (Coord { x: 12, y: 5 }, Coord { x: 12, y: 8 })),
+                ("6b", (Coord { x: 13, y: 9 }, Coord { x: 16, y: 9 })),
+                ("7a", (Coord { x: 13, y: 1 }, Coord { x: 13, y: 4 })),
+                ("7b", (Coord { x: 16, y: 9 }, Coord { x: 16, y: 12 })),
+            ])
+        };
+        static ref EDGES: HashMap<&'static str, (Coord, Coord)> = {
+            HashMap::from([
+                ("1a", (Coord { x: 50, y: 151 }, Coord { x: 50, y: 200 })),
+                ("1b", (Coord { x: 51, y: 150 }, Coord { x: 100, y: 150 })),
+                ("2a", (Coord { x: 100, y: 51 }, Coord { x: 100, y: 100 })),
+                ("2b", (Coord { x: 101, y: 50 }, Coord { x: 150, y: 50 })),
+                ("3a", (Coord { x: 1, y: 101 }, Coord { x: 1, y: 150 })),
+                ("3b", (Coord { x: 51, y: 1 }, Coord { x: 51, y: 50 })),
+                ("4a", (Coord { x: 1, y: 101 }, Coord { x: 50, y: 101 })),
+                ("4b", (Coord { x: 51, y: 51 }, Coord { x: 51, y: 100 })),
+                ("5a", (Coord { x: 1, y: 151 }, Coord { x: 1, y: 200 })),
+                ("5b", (Coord { x: 51, y: 1 }, Coord { x: 100, y: 1 })),
+                ("6a", (Coord { x: 101, y: 1 }, Coord { x: 150, y: 1 })),
+                ("6b", (Coord { x: 1, y: 200 }, Coord { x: 50, y: 200 })),
+                ("7a", (Coord { x: 100, y: 101 }, Coord { x: 100, y: 150 })),
+                ("7b", (Coord { x: 150, y: 1 }, Coord { x: 150, y: 50 })),
+            ])
+        };
+        static ref TEST_FOLD_A: FoldType = {
+            vec![
+                (("1a", Dir::U), ("2a", Dir::U), true),
+                (("4a", Dir::U), ("3a", Dir::U), true),
+                (("4b", Dir::U), ("3b", Dir::U), true),
+                (("6b", Dir::U), ("5b", Dir::U), true),
+                (("1b", Dir::L), ("7a", Dir::L), true),
+                (("5a", Dir::L), ("6a", Dir::L), true),
+                (("2b", Dir::L), ("7b", Dir::L), true),
+            ]
+        };
+        static ref TEST_FOLD_B: FoldType = {
+            vec![
+                (("1a", Dir::U), ("1b", Dir::R), true),
+                (("2a", Dir::D), ("2b", Dir::R), false),
+                (("3a", Dir::D), ("3b", Dir::U), false),
+                (("4a", Dir::U), ("4b", Dir::D), false),
+                (("5a", Dir::L), ("5b", Dir::U), false),
+                (("6a", Dir::R), ("6b", Dir::D), false),
+                (("7a", Dir::D), ("7b", Dir::L), false),
+            ]
+        };
+        static ref FOLD_A: FoldType = {
+            vec![
+                (("4a", Dir::U), ("6b", Dir::U), true),
+                (("5b", Dir::U), ("1b", Dir::U), true),
+                (("6a", Dir::U), ("2b", Dir::U), true),
+                (("3b", Dir::L), ("7b", Dir::L), true),
+                (("4b", Dir::L), ("2a", Dir::L), true),
+                (("3a", Dir::L), ("7a", Dir::L), true),
+                (("5a", Dir::L), ("1a", Dir::L), true),
+            ]
+        };
+        static ref FOLD_B: FoldType = {
+            vec![
+                (("1a", Dir::R), ("1b", Dir::U), true),
+                (("2a", Dir::R), ("2b", Dir::U), true),
+                (("3a", Dir::L), ("3b", Dir::R), false),
+                (("4a", Dir::U), ("4b", Dir::R), true),
+                (("5a", Dir::L), ("5b", Dir::D), true),
+                (("6a", Dir::U), ("6b", Dir::U), true),
+                (("7a", Dir::R), ("7b", Dir::L), false),
+            ]
+        };
     }
 }
