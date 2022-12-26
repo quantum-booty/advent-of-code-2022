@@ -7,14 +7,7 @@ use nom::{
 pub fn solution(input: &str, decryption_key: i64, n_mixes: usize) -> i64 {
     let (_, numbers) = parse(input).unwrap();
     let numbers: Vec<_> = numbers.iter().map(|n| n * decryption_key).collect();
-    // mix_index index encodes the ordering/position of number
-    // mix_index element encodes which index in numbers it correspond to
-    let mut mix_index: Vec<_> = (0..numbers.len()).collect();
-    for _ in 0..n_mixes {
-        mix(&numbers, &mut mix_index);
-    }
-    let mixed_numbers: Vec<_> = mix_index.iter().map(|&idx| numbers[idx]).collect();
-
+    let mixed_numbers = mix_n(numbers, n_mixes);
     let zero_idx = mixed_numbers.iter().position(|n| *n == 0).unwrap();
 
     [1000, 2000, 3000]
@@ -22,6 +15,17 @@ pub fn solution(input: &str, decryption_key: i64, n_mixes: usize) -> i64 {
         .map(|steps| (zero_idx + steps) % mixed_numbers.len())
         .map(|idx| mixed_numbers[idx])
         .sum()
+}
+
+fn mix_n(numbers: Vec<i64>, n_mixes: usize) -> Vec<i64> {
+    // mix_index index encodes the ordering/position of number
+    // mix_index element encodes which index in numbers it correspond to
+    let mut mix_index: Vec<_> = (0..numbers.len()).collect();
+    for _ in 0..n_mixes {
+        mix(&numbers, &mut mix_index);
+    }
+    let mixed_numbers: Vec<_> = mix_index.iter().map(|&idx| numbers[idx]).collect();
+    mixed_numbers
 }
 
 fn mix(numbers: &[i64], mix_index: &mut Vec<usize>) {
