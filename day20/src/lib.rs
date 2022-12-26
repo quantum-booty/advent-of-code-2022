@@ -8,15 +8,21 @@ use nom::{
 #[derive(Debug, Clone, Copy)]
 struct Node {
     number: i32,
+    idx: usize,
+    is_head: bool,
     prev: usize,
     next: usize,
 }
 
+// when head moves, head.next becomes the head
 pub fn solution_a(input: &str) -> i32 {
     let mut nodes = parse_nodes(input);
 
+    // visualise(&nodes);
     for i in 0..nodes.len() {
         move_ith_node(&mut nodes, i);
+        // println!("{nodes:?}");
+        // visualise(&nodes);
     }
 
     let start = nodes.iter().find(|n| n.number == 0).unwrap();
@@ -33,30 +39,46 @@ pub fn solution_a(input: &str) -> i32 {
     numbers.iter().sum()
 }
 
+fn visualise(nodes: &Vec<Node>) {
+    let head_position = nodes.iter().position(|n| n.is_head).unwrap();
+    let head = nodes[head_position];
+    let mut numbers = vec![head.number];
+    let mut cur_node = nodes[head.next];
+    while !cur_node.is_head {
+        numbers.push(cur_node.number);
+        cur_node = nodes[cur_node.next];
+    }
+    println!("{numbers:?}");
+}
+
 fn move_ith_node(nodes: &mut [Node], i: usize) {
-    let current = nodes[i];
-    if current.number == 0 {
+    let curr = nodes[i];
+    if curr.number == 0 {
+        // println!("{} does not move", current.number);
         return;
     }
 
-    let dest_idx = get_destination_idx(i, current, nodes);
-    unsafe {
-        let [prev, next] = nodes.get_many_unchecked_mut([current.prev, current.next]);
-        prev.next = current.next;
-        next.prev = current.prev;
-    }
-
+    let dest_idx = get_destination_idx(i, curr, nodes);
     let dest = nodes[dest_idx];
     unsafe {
-        let [dest, current, dest_next] = nodes.get_many_unchecked_mut([dest_idx, i, dest.next]);
-        current.prev = dest_idx;
-        current.next = dest.next;
-        dest.next = i;
-        dest_next.prev = i;
+        let [curr_prev, curr, curr_next, dest, dest_next] =
+            nodes.get_many_unchecked_mut([curr.prev, i, curr.next, dest_idx, dest.next]);
+
+        curr_prev.next = curr_next.idx;
+        curr_next.prev = curr_prev.idx;
+        if curr.is_head {
+            curr_next.is_head = true;
+            curr.is_head = false;
+        }
+
+        dest.next = curr.idx;
+        curr.prev = dest.idx;
+        curr.next = dest_next.idx;
+        dest_next.prev = curr.idx;
     }
 }
 
-fn get_destination_idx(i: usize, current: Node, nodes: &mut [Node]) -> usize {
+fn get_destination_idx(i: usize, current: Node, nodes: &[Node]) -> usize {
     let mut dest_idx = i;
     let n_iter = if current.number.is_positive() {
         current.number.abs()
@@ -67,7 +89,7 @@ fn get_destination_idx(i: usize, current: Node, nodes: &mut [Node]) -> usize {
         dest_idx = match current.number {
             n if n > 0 => nodes[dest_idx].next,
             n if n < 0 => nodes[dest_idx].prev,
-            _ => i,
+            _ => unreachable!(),
         };
     }
     dest_idx
@@ -80,8 +102,10 @@ fn parse_nodes(input: &str) -> Vec<Node> {
         .enumerate()
         .map(|(i, &number)| Node {
             number,
+            idx: i,
+            is_head: i == 0,
             prev: if i == 0 { numbers.len() - 1 } else { i - 1 },
-            next: (i + 1) % numbers.len(),
+            next: if i == numbers.len() - 1 { 0 } else { i + 1 },
         })
         .collect()
 }
