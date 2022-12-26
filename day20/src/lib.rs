@@ -3,12 +3,14 @@ use nom::{
     multi::separated_list1,
     IResult,
 };
+use tracing::*;
 
 pub fn solution(input: &str, decryption_key: i64, n_mixes: usize) -> i64 {
     let (_, numbers) = parse(input).unwrap();
     let numbers: Vec<_> = numbers.iter().map(|n| n * decryption_key).collect();
     let mixed_numbers = mix_n(numbers, n_mixes);
     let zero_idx = mixed_numbers.iter().position(|n| *n == 0).unwrap();
+    debug!(?mixed_numbers);
 
     [1000, 2000, 3000]
         .iter()
@@ -61,6 +63,8 @@ mod tests {
 
     #[test]
     fn it_works() {
+        tracing_subscriber::fmt().with_max_level(Level::WARN).init();
+
         let decryption_key = 811589153;
         assert_eq!(solution(TEST_INPUT, 1, 1), 3);
         println!("{}", solution(INPUT, 1, 1));
