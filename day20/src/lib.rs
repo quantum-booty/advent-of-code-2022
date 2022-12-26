@@ -8,7 +8,7 @@ pub fn solution(input: &str, decryption_key: i64, n_mixes: usize) -> i64 {
     let (_, numbers) = parse(input).unwrap();
     let numbers: Vec<_> = numbers.iter().map(|n| n * decryption_key).collect();
     // mix_index index encodes the ordering/position of number
-    // mix_index element encodes which the index in numbers it correspond to
+    // mix_index element encodes which index in numbers it correspond to
     let mut mix_index: Vec<_> = (0..numbers.len()).collect();
     for _ in 0..n_mixes {
         mix(&numbers, &mut mix_index);
